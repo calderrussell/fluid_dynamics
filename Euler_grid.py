@@ -26,8 +26,19 @@ dt = 0.01
 rho = 1.0
 visc = 0.0 # Numerical dissipation will act as slight viscosity
 
+# --- Obstacle Setup ---
+# Create a mask for solid objects. True = Wall.
+solid_mask = np.zeros((N_y, N_x), dtype=bool)
+
+# Define a square obstacle in the top-right quadrant
+# Top-right is high x, high y indexes
+obs_x_start, obs_x_end = int(0.6 * N_x), int(0.8 * N_x)
+obs_y_start, obs_y_end = int(0.6 * N_y), int(0.8 * N_y)
+
+solid_mask[obs_y_start:obs_y_end, obs_x_start:obs_x_end] = True
+
 # --- Initialize Solver ---
-solver = FluidSolver(N_x, N_y, dt, h, rho=rho, visc=visc)
+solver = FluidSolver(N_x, N_y, dt, h, rho=rho, visc=visc, solid_mask=solid_mask)
 
 # --- Initial Conditions (The "Impulse") ---
 # Instead of continuous forcing, we set an initial state and let it evolve.
@@ -36,18 +47,19 @@ solver = FluidSolver(N_x, N_y, dt, h, rho=rho, visc=visc)
 # We place a blob of density in the middle
 density = np.zeros((N_y, N_x))
 cx, cy = N_x // 2, N_y // 2
-density[cy-5:cy+5, cx-5:cx+5] = 1.0  # A square block of dye
+density[cy-8:cy+8, cx-8:cx+8] = 1.0  # A square block of dye
 
 # 2. Add an initial velocity impulse
-# We push the fluid up and to the right initially
-solver.u[cy-5:cy+5, cx-5:cx+5] = 2.0
-solver.v[cy-5:cy+5, cx-5:cx+5] = 2.0
+# We push the fluid up and to the right initially (towards the obstacle)
+solver.u[cy-8:cy+8, cx-8:cx+8] = 3.0
+solver.v[cy-8:cy+8, cx-8:cx+8] = 3.0
 
 print("Simulation initialized with a single center impulse.")
+print(f"Obstacle placed at X:[{obs_x_start}-{obs_x_end}], Y:[{obs_y_start}-{obs_y_end}]")
 
 # --- Visualization Setup ---
 fig, ax = plt.subplots(figsize=(8, 8))
-ax.set_title("Staggered Grid Fluid Simulation\n(Density + Velocity)")
+ax.set_title("Staggered Grid Fluid Simulation\n(Density + Velocity + Obstacles)")
 ax.set_xlim(0, N_x)
 ax.set_ylim(0, N_y)
 
@@ -55,7 +67,14 @@ ax.set_ylim(0, N_y)
 # We use imshow to show the scalar field
 im = ax.imshow(density, origin='lower', cmap='inferno', vmin=0, vmax=1.0, extent=[0, N_x, 0, N_y])
 
-# 2. Plot Velocity (The "Flow")
+# 2. Plot Obstacles
+# Overlay the solid mask in gray
+# We use a masked array to make non-solid parts transparent
+obstacle_viz = np.ma.masked_where(~solid_mask, np.ones_like(solid_mask))
+ax.imshow(obstacle_viz, origin='lower', cmap='gray', vmin=0, vmax=1, 
+          extent=[0, N_x, 0, N_y], alpha=0.9, interpolation='nearest')
+
+# 3. Plot Velocity (The "Flow")
 # We use quiver with fewer arrows (stride) to keep it readable
 stride = 2
 x_grid, y_grid = np.meshgrid(np.arange(N_x) + 0.5, np.arange(N_y) + 0.5)
