@@ -50,11 +50,19 @@ cx, cy = N_x // 2, N_y // 2
 density[cy-8:cy+8, cx-8:cx+8] = 1.0  # A square block of dye
 
 # 2. Add an initial velocity impulse
-# We push the fluid up and to the right initially (towards the obstacle)
-solver.u[cy-8:cy+8, cx-8:cx+8] = 3.0
-solver.v[cy-8:cy+8, cx-8:cx+8] = 3.0
+# Define magnitude (speed) and direction (angle theta)
+speed = 5.0
+theta = np.pi / 8.0  # 45 degrees, pointing towards top-right
+
+u_vel = speed * np.cos(theta)
+v_vel = speed * np.sin(theta)
+
+# Apply to the center block
+solver.u[cy-8:cy+8, cx-8:cx+8] = u_vel
+solver.v[cy-8:cy+8, cx-8:cx+8] = v_vel
 
 print("Simulation initialized with a single center impulse.")
+print(f"Impulse: Speed={speed:.2f}, Angle={theta/np.pi:.2f}*pi rad")
 print(f"Obstacle placed at X:[{obs_x_start}-{obs_x_end}], Y:[{obs_y_start}-{obs_y_end}]")
 
 # --- Visualization Setup ---
