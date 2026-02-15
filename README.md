@@ -2,7 +2,7 @@
 
 A 2D Incompressible Fluid Simulation implemented in Python using the **Marker-and-Cell (MAC)** method on a staggered grid. This project demonstrates core computational fluid dynamics (CFD) concepts including semi-Lagrangian advection, pressure projection, and real-time visualization.
 
-## 🌊 Overview
+## Overview
 
 The simulation solves the **Incompressible Navier-Stokes equations** for inviscid flow:
 
@@ -16,7 +16,7 @@ The simulation solves the **Incompressible Navier-Stokes equations** for invisci
 -   **Passive Scalar Transport**: Simulates "dye" or "smoke" density to visualize the flow dynamics.
 -   **Interactive Visualization**: Real-time animation using `matplotlib`.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -51,7 +51,7 @@ You should see a window open displaying:
 -   **Orange/Purple Field**: The density (dye) concentration.
 -   The simulation starts with an initial **impulse** in the center, creating a vortex pair that travels through the box.
 
-## 📂 Project Structure
+## Project Structure
 
 -   `fluid_solver.py`:
     -   Contains the `FluidSolver` class.
@@ -62,7 +62,7 @@ You should see a window open displaying:
     -   Initializes the fluid state (initial velocity and dye).
     -   Runs the `matplotlib` animation loop.
 
-## 🔬 Physics Implementation Details
+## Physics Implementation Details
 
 ### 1. Advection (Semi-Lagrangian)
 To update a quantity $q$ at position $\mathbf{x}$, we trace back where a particle at $\mathbf{x}$ came from one time step ago: $\mathbf{x}_{old} \approx \mathbf{x} - \mathbf{u}(\mathbf{x}) \Delta t$. We then interpolate the value of $q$ at $\mathbf{x}_{old}$. This is implemented using `scipy.ndimage.map_coordinates` for efficiency.
@@ -70,7 +70,7 @@ To update a quantity $q$ at position $\mathbf{x}$, we trace back where a particl
 ### 2. Projection (Pressure Solve)
 After advection, the velocity field $\mathbf{u}^*$ may not be divergence-free. We decompose it (Helmholtz-Hodge) into a divergence-free part and a gradient field. We solve for pressure $p$ such that subtracting $\nabla p$ from $\mathbf{u}^*$ makes the divergence zero. This involves solving a large sparse linear system (Discrete Laplacian), handled efficiently by `scipy`.
 
-## 🔮 Future Improvements
+## Future Improvements
 -   Add **viscosity** (diffusion term).
 -   Implement **interactive controls** (mouse interaction to push fluid).
 -   Port to **JAX** or **GPU** for higher resolution.
